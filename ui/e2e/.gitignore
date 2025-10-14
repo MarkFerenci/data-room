@@ -1,0 +1,17 @@
+# .gitignore for E2E Tests
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Test data
+test-data/
+*.pdf
+*.log
+
+# Downloads
+downloads/
+
+# Screenshots
+screenshots/

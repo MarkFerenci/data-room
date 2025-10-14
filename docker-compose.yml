@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: dataroom-postgres
+    environment:
+      POSTGRES_USER: dataroom
+      POSTGRES_PASSWORD: dataroom_dev_password
+      POSTGRES_DB: dataroom
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dataroom"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dataroom-network
+
+  # Flask Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dataroom-backend
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://dataroom:dataroom_dev_password@postgres:5432/dataroom
+      - FLASK_ENV=development
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-me}
+      - CORS_ORIGINS=http://localhost:5000
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - OAUTH_REDIRECT_URI=${OAUTH_REDIRECT_URI:-http://localhost:5000/auth/callback}
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend:/app
+      - uploads-data:/app/uploads
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import requests; requests.get('http://localhost:5001/health')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - dataroom-network
+    restart: unless-stopped
+
+  # React + Vite Frontend
+  frontend:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: dataroom-frontend
+    environment:
+      - VITE_BACKEND_URL=http://backend:5001
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules  # Prevent overwriting node_modules
+    depends_on:
+      - backend
+    networks:
+      - dataroom-network
+    restart: unless-stopped
+
+networks:
+  dataroom-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    name: dataroom-postgres-data
+  uploads-data:
+    name: dataroom-uploads-data

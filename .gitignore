@@ -1,0 +1,46 @@
+# Python
+.github
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/.venv/
+backend/venv/
+backend/env/
+backend/uploads/
+*.egg-info/
+*.env
+
+# Node
+ui/node_modules/
+ui/dist/
+ui/.env
+ui/.env.local
+
+# Database
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Miscellaneous
+out/**
+.vercel
