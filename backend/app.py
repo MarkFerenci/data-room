@@ -48,9 +48,14 @@ def create_app() -> Flask:
         """Health check endpoint."""
         return {"status": "healthy", "service": "dataroom-backend"}
 
-    # Create database tables
-    with app.app_context():
-        db.create_all()
+    # Create database tables (skip in serverless environments)
+    # In serverless, tables should be created via migration scripts
+    try:
+        with app.app_context():
+            db.create_all()
+    except Exception as e:
+        # Log the error but don't fail - tables might already exist or we're in serverless
+        print(f"Warning: Could not create tables: {e}")
 
     return app
 
