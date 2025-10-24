@@ -173,6 +173,7 @@ uvx podman-compose up -d
 # 3. Access the application
 # Frontend: http://localhost:5000
 # Backend API: http://localhost:5001
+# Production (Vercel): https://data-room-silk.vercel.app
 ```
 
 ### Manual Setup (Development)
